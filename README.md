@@ -1,52 +1,54 @@
 # asya-7
-# ASYA ÜLKELERİ E-KİTAP OLUŞTURUCU
-# Kodu kopyala -> https://replit.com/ sitesine yapıştır -> Çalıştır butonuna bas
+# ASYA ÜLKELERİ E-KİTAP 
 
 from fpdf import FPDF
-import requests
+import csv
 
-# PDF AYARLARI
-pdf = FPDF(orientation='P', unit='mm', format='A4')
-pdf.set_auto_page_break(auto=True, margin=15)
-pdf.add_font('DejaVu', '', 'DejaVuSansCondensed.ttf', uni=True)
-pdf.set_font('DejaVu', '', 14)
+class AsiaEbook:
+    def __init__(self):
+        self.pdf = FPDF()
+        self.pdf.set_auto_page_break(auto=True, margin=15)
+        self.pdf.add_font('DejaVu', '', 'DejaVuSansCondensed.ttf', uni=True)
+        
+    def create_cover(self):
+        self.pdf.add_page()
+        self.pdf.set_font('DejaVu', '', 24)
+        self.pdf.cell(0, 40, "ASYA ÜLKELERİ REHBERİ", 0, 1, 'C')
+        self.pdf.image("asia_map.png", x=50, y=60, w=100)
+        self.pdf.set_font('DejaVu', '', 16)
+        self.pdf.cell(0, 40, "Hazırlayan: Ali Ekber HÖKELEK", 0, 1, 'C')
+        self.pdf.cell(0, 10, "Fatoş Büyükkuşoğlu İlkokulu - 4/C", 0, 1, 'C')
 
-# KAPAK SAYFASI
-pdf.add_page()
-pdf.image("https://i.ibb.co/0nXqL9J/asia-map.jpg", x=10, y=20, w=180)  # Asya haritası
-pdf.set_y(100)
-pdf.cell(0, 10, "ASYA ÜLKELERİ REHBERİ", 0, 1, 'C')
-pdf.cell(0, 10, "Hazırlayan: Ali Ekber HÖKELEK", 0, 1, 'C')
-pdf.cell(0, 10, "Fatoş Büyükkuşoğlu İlkokulu - 4/C", 0, 1, 'C')
+    def add_country(self, country_data):
+        self.pdf.add_page()
+        self.pdf.set_font('DejaVu', '', 18)
+        self.pdf.cell(0, 10, country_data['name'], 0, 1, 'C')
+        self.pdf.image(f"flags/{country_data['code']}.png", x=80, y=40, w=50)
+        self.pdf.set_font('DejaVu', '', 14)
+        self.pdf.cell(0, 30, f"Başkent: {country_data['capital']}", 0, 1)
+        self.pdf.cell(0, 10, f"Nüfus: {country_data['population']}", 0, 1)
+        self.pdf.cell(0, 10, f"Para Birimi: {country_data['currency']}", 0, 1)
+        self.pdf.multi_cell(0, 10, f"Ünlü Yemekler: {country_data['food']}")
 
-# ÜLKE BİLGİLERİ (Örnek 3 ülke)
-ülkeler = [
-    {
-        "ad": "IRAK",
-        "başkent": "Bağdat",
-        "nüfus": "43 Milyon",
-        "yemek": "Masgouf",
-        "resim": "https://i.ibb.co/0JbY9Wz/irak.jpg"
-    },
-    {
-        "ad": "JAPONYA",
-        "başkent": "Tokyo",
-        "nüfus": "125 Milyon",
-        "yemek": "Suşi",
-        "resim": "https://i.ibb.co/0JbY9Wz/japonya.jpg"
-    }
-]
+    def generate(self):
+        self.create_cover()
+        
+        # CSV dosyasından ülke verilerini oku (Örnek veri)
+        countries = [
+            {'name':'IRAK', 'code':'iq', 'capital':'Bağdat', 
+             'population':'43 Milyon', 'currency':'Irak Dinarı',
+             'food':'Masgouf'},
+            {'name':'JAPONYA', 'code':'jp', 'capital':'Tokyo',
+             'population':'125 Milyon', 'currency':'Japon Yeni',
+             'food':'Suşi, Ramen'}
+        ]
+        
+        for country in countries:
+            self.add_country(country)
+            
+        self.pdf.output("asia_countries.pdf")
+        print("E-kitap oluşturuldu: asia_countries.pdf")
 
-# HER ÜLKE İÇİN SAYFA OLUŞTUR
-for ülke in ülkeler:
-    pdf.add_page()
-    pdf.cell(0, 10, ülke["ad"], 0, 1, 'C')
-    pdf.image(ülke["resim"], x=50, y=40, w=100)
-    pdf.set_y(120)
-    pdf.cell(0, 10, f"Başkent: {ülke['başkent']}", 0, 1)
-    pdf.cell(0, 10, f"Nüfus: {ülke['nüfus']}", 0, 1)
-    pdf.cell(0, 10, f"Ünlü Yemek: {ülke['yemek']}", 0, 1)
-
-# DOSYAYI KAYDET
-pdf.output("Asya_Ulkeleri_Rehberi.pdf")
-print("PDF OLUŞTURULDU! Sağ üstteki 'Download' butonuna basarak indirin.")
+if __name__ == "__main__":
+    ebook = AsiaEbook()
+    ebook.generate()
